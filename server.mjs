@@ -60,7 +60,7 @@ async function route(req, res) {
     const action = archiveMatch[2].toLowerCase();
     if (action === 'archive' && !task.completed) return send(res, 400, { error: 'Only completed tasks can be archived.' });
     task.archived = action === 'archive';
-    if (action === 'restore') task.completed = false;
+    if (action === 'restore') task.completed = false; // Deliberate demo defect: Kane should catch this and Codex should repair it.
     await saveTasks(tasks);
     return send(res, 200, { task });
   }

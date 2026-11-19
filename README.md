@@ -1,31 +1,45 @@
-﻿# PatchLoop Full Showcase
+﻿# PatchLoop Full Showcase target
 
-A small task app used to demonstrate a real PatchLoop repair cycle. The committed baseline contains one intentional regression: restoring an archived completed task clears its completed state.
+This is a small, real Node.js task application intended to be selected from PatchLoop's repository picker. It has an Active list, completion checkboxes, an Archived list, and archive/restore actions backed by a JSON data file.
 
-## Run the app
+## Purpose
 
-Requirements: Node.js 20 or newer. No npm dependencies are required.
+The initial commit deliberately contains one documented repair challenge: restoring an archived completed task clears its completed state. The bundled Kane objective catches that defect. A successful demonstration records two failures of the same fixed objective, a human-approved Codex repair in a disposable worktree, a reviewable diff, and a Kane rerun of the unchanged objective.
+
+The challenge bug is intentional and isolated to this showcase repository. Do not copy it into a production application.
+
+## Point PatchLoop at this repository
+
+Clone this repository on the same computer where PatchLoop and the Kane/Codex CLIs run. Start PatchLoop from its checkout with the showcase clone path set:
+
+### Windows PowerShell
 
 ```powershell
-$env:PATCHLOOP_HOST = '127.0.0.1'
-$env:PATCHLOOP_PORT = '4180'
-node server.mjs
+$env:PATCHLOOP_TARGET_REPO = 'C:\path\to\patchloop-full-showcase'
+npm.cmd start
 ```
 
-Open http://127.0.0.1:4180. Data is written to `.data` by default. PatchLoop sets an isolated `PATCHLOOP_DATA_DIR` when it launches a run.
+### macOS / Linux
 
-## Use it with PatchLoop
+```sh
+export PATCHLOOP_TARGET_REPO="$HOME/src/patchloop-full-showcase"
+npm start
+```
 
-1. Clone this repository to the machine running PatchLoop.
-2. Set `PATCHLOOP_TARGET_REPO` to the clone's absolute local path before starting PatchLoop.
-3. In PatchLoop, choose **PatchLoop Full Showcase** in the target repository selector.
-4. Load the bundled task and submit its fixed Kane objective.
-5. Let Kane record the seeded failure twice. Review the matching failure, approve Codex repair, inspect the diff, then rerun the exact same objective with Kane.
+PatchLoop will list **PatchLoop Full Showcase** in its target repository picker. Select it before submitting the task. PatchLoop uses this committed baseline to create an isolated Git worktree. It never edits the checkout you selected. Confirm the selected target is ready in PatchLoop's preflight before running.
 
-PatchLoop uses the committed Git baseline and works in a detached worktree. The local checkout remains unchanged. The intended pass condition is that the task is absent from Active while archived, present in Archived, and restored to Active with its original title and completed state.
+## Repair challenge
 
-## Intentional flaw
+**Coding task**
 
-`server.mjs` sets `completed` to false during restore. That line is intentionally present in the published baseline for the demo. The expected repair removes the completion reset while preserving archive/restore behavior.
+> Fix task restoration so restoring an archived completed task preserves its completed checkbox and title.
 
-This repository demonstrates a testable seeded defect. It does not claim a Codex repair or Kane pass has occurred; publish such a result only after recording an actual PatchLoop run.
+**Fixed Kane acceptance objective**
+
+> On the Tasks page, create a task named “PatchLoop repair proof,” mark it complete, archive it, verify it is absent from Active and present in Archived, restore it, then verify it appears in Active with its completed checkbox still checked and its title unchanged.
+
+Kane should first expose the defect after restoration. Replay the same objective once. After the repeated failure, inspect the recorded evidence and explicitly request Codex. Review its diff and run the unchanged objective again. A repair is verified only if Kane returns a passing final event and exits successfully.
+
+## Runtime contract
+
+`patchloop.target.json` supplies the start command and readiness URL. PatchLoop also sets `PORT`, `PATCHLOOP_PORT`, `PATCHLOOP_HOST`, and a fresh `PATCHLOOP_DATA_DIR` for each run. The app binds to loopback and stores each run's task data in that isolated directory.
