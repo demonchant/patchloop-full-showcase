@@ -8,25 +8,35 @@ The initial commit deliberately contains one documented repair challenge: restor
 
 The challenge bug is intentional and isolated to this showcase repository. Do not copy it into a production application.
 
-## Point PatchLoop at this repository
+## Use it with the hosted PatchLoop site
 
-Clone this repository on the same computer where PatchLoop and the Kane/Codex CLIs run. Start PatchLoop from its checkout with the showcase clone path set:
+PatchLoop's UI is hosted at [patchloop-web.onrender.com](https://patchloop-web.onrender.com). Kane and Codex run on your computer through PatchLoop's paired local worker.
+
+Clone both the PatchLoop worker and this target repository on the computer where Kane and Codex are installed:
 
 ### Windows PowerShell
 
 ```powershell
-$env:PATCHLOOP_TARGET_REPO = 'C:\path\to\patchloop-full-showcase'
-npm.cmd start
+git clone https://github.com/demonchant/kane-cli.git patchloop-runner
+git clone https://github.com/demonchant/patchloop-full-showcase.git
+cd patchloop-runner
+npm ci
+$env:PATCHLOOP_TARGET_REPO = (Resolve-Path ..\patchloop-full-showcase).Path
+npm run worker -- --url https://patchloop-web.onrender.com --pair-code 'PASTE_CODE_FROM_CONNECT_LOCAL_RUNNER'
 ```
 
 ### macOS / Linux
 
 ```sh
-export PATCHLOOP_TARGET_REPO="$HOME/src/patchloop-full-showcase"
-npm start
+git clone https://github.com/demonchant/kane-cli.git patchloop-runner
+git clone https://github.com/demonchant/patchloop-full-showcase.git
+cd patchloop-runner
+npm ci
+export PATCHLOOP_TARGET_REPO="$HOME/patchloop-full-showcase"
+npm run worker -- --url https://patchloop-web.onrender.com --pair-code 'PASTE_CODE_FROM_CONNECT_LOCAL_RUNNER'
 ```
 
-PatchLoop will list **PatchLoop Full Showcase** in its target repository picker. Select it before submitting the task. PatchLoop uses this committed baseline to create an isolated Git worktree. It never edits the checkout you selected. Confirm the selected target is ready in PatchLoop's preflight before running.
+Get the one-time code from **Connect local runner** on the hosted site and replace the sample value above. The code expires after one use. Keep the worker terminal open; it prints the ready repository count. Sign in to the hosted site with the same Google account, refresh the target picker, and select **PatchLoop Full Showcase**. PatchLoop uses this committed baseline to create an isolated Git worktree and leaves the selected checkout unchanged.
 
 ## Repair challenge
 
